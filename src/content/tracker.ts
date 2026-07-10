@@ -37,7 +37,10 @@ export class ConversationTracker implements IConversationTracker {
   }
 
   async addDelta(params: AddDeltaParams): Promise<void> {
-    if (!this.current) return;
+    if (!this.current) {
+      console.log('[wc] tracker addDelta skip: no current conversation');
+      return;
+    }
 
     this.current.waterMl = Math.min(this.current.waterMl + params.ml, MAX_WATER_ML);
     this.current.tokenCount += params.tokens;
@@ -45,6 +48,8 @@ export class ConversationTracker implements IConversationTracker {
     if (params.topic !== undefined) {
       this.current.topic = params.topic;
     }
+
+    console.log('[wc] tracker addDelta: +' + params.ml.toFixed(3) + 'ml, total=' + this.current.waterMl.toFixed(1) + 'ml, tokens=' + this.current.tokenCount);
 
     this.overlay.update(this.current.waterMl);
 

@@ -329,6 +329,7 @@ export class WaterBottleOverlay implements IOverlayUI {
 
     this.healthCheckId = window.setInterval(() => {
       if (this.mounted && this.frameCount - this.lastLoopFrame > 3) {
+        console.log('[wc] HEALTH: loop stalled (frame', this.frameCount, 'lastLoopFrame', this.lastLoopFrame, '), restarting');
         cancelAnimationFrame(this.animFrameId);
         this.animFrameId = requestAnimationFrame(loop);
         this.lastLoopFrame = this.frameCount;
@@ -402,6 +403,10 @@ export class WaterBottleOverlay implements IOverlayUI {
     const oy = this.gridOffsetY;
 
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    if (this.frameCount % 120 === 0) {
+      console.log('[wc] render frame', this.frameCount, 'waterMl:', this.waterMl.toFixed(1), 'target:', this.targetWaterMl.toFixed(1), 'capacity:', this.capacityMl, 'cellSize:', cs);
+    }
 
     const isRidgeRow = (row: number) => row === 14 || row === 18 || row === 21;
     const isCapRow = (row: number) => row <= 2;
@@ -543,6 +548,7 @@ export class WaterBottleOverlay implements IOverlayUI {
   }
 
   update(ml: number): void {
+    console.log('[wc] overlay update: targetMl=' + ml.toFixed(1) + ', currentMl=' + this.waterMl.toFixed(1));
     this.targetWaterMl = ml;
 
     if (ml > this.waterMl) {
