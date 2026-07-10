@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { IndexedDBStore } from '../../src/shared/db';
-import type { ConversationRecord, IConversationStore } from '../../src/shared/types';
+import type { ConversationRecord } from '../../src/shared/types';
 import 'fake-indexeddb/auto';
 
 describe('IndexedDBStore', () => {
-  let store: IConversationStore;
+  let store: IndexedDBStore;
   const dbName = 'test-water-calc';
 
   beforeEach(async () => {
@@ -20,7 +20,7 @@ describe('IndexedDBStore', () => {
     id: crypto.randomUUID(),
     url: 'https://chatgpt.com/c/test',
     platform: 'chatgpt',
-    topic: 'Test',
+    title: 'Test',
     waterMl: 0,
     tokenCount: 0,
     startedAt: new Date().toISOString(),
