@@ -18,6 +18,7 @@ class WaterCalculator {
   private scraper: DOMScraper | null = null;
   private config: PlatformConfig | null = null;
   private initialized = false;
+  private lastUrl = window.location.href;
   private initDelay = 1000;
 
   constructor() {
@@ -69,7 +70,8 @@ class WaterCalculator {
     this.initialized = true;
 
     const url = window.location.href;
-    let record = await this.tracker.resume(url);
+    const isNewChat = this.isNewChatPage(url);
+    let record = isNewChat ? null : await this.tracker.resume(url);
 
     if (!record) {
       record = await this.tracker.start(url, this.config.id);
@@ -95,6 +97,16 @@ class WaterCalculator {
     }
   }
 
+  private isNewChatPage(url: string): boolean {
+    const u = new URL(url);
+    const path = u.pathname;
+    if (u.hostname.includes('chatgpt.com') && !path.includes('/c/')) return true;
+    if (u.hostname.includes('gemini.google.com') && !path.includes('/app/')) return true;
+    if (u.hostname.includes('claude.ai') && (path === '/' || path === '')) return true;
+    if (u.hostname.includes('perplexity.ai') && !path.includes('/search/')) return true;
+    return false;
+  }
+
   private scrapeTitle(): string {
     if (!this.config) return '';
     const titleEl = document.querySelector(this.config.selectors.title);
@@ -118,6 +130,63 @@ class WaterCalculator {
 
     window.addEventListener('pageshow', () => this.onResume());
     window.addEventListener('pagehide', () => this.onPause());
+
+    this.watchNavigation();
+  }
+
+  private watchNavigation(): void {
+    const checkUrl = () => {
+      const currentUrl = window.location.href;
+      if (currentUrl !== this.lastUrl) {
+        this.lastUrl = currentUrl;
+        this.onUrlChange(currentUrl);
+      }
+    };
+
+    const originalPush = history.pushState.bind(history);
+    history.pushState = (...args) => {
+      originalPush(...args);
+      setTimeout(checkUrl, 100);
+    };
+
+    const originalReplace = history.replaceState.bind(history);
+    history.replaceState = (...args) => {
+      originalReplace(...args);
+      setTimeout(checkUrl, 100);
+    };
+
+    window.addEventListener('popstate', () => setTimeout(checkUrl, 100));
+
+    setInterval(checkUrl, 2000);
+  }
+
+  private async onUrlChange(url: string): Promise<void> {
+    this.scraper?.detach();
+    this.initialized = false;
+
+    const record = await this.tracker.resume(url);
+    if (record) {
+      this.overlay.update(record.waterMl);
+      this.overlay.setState('active');
+    } else {
+      if (!this.config) return;
+      await this.tracker.start(url, this.config.id);
+      this.overlay.update(0);
+    }
+
+    if (this.config) {
+      this.scraper = new DOMScraper(this.config);
+      this.scraper.onNewText((delta) => {
+        const tokens = this.estimator.estimate(delta);
+        const ml = this.converter.toMl(tokens);
+        this.tracker.addDelta({ ml, tokens });
+      });
+      const container = this.findMessageContainer();
+      if (container) {
+        this.scraper.attach(container);
+      }
+      this.initialized = true;
+    }
   }
 
   private onResume(): void {
