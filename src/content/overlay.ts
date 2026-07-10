@@ -200,6 +200,7 @@ export class WaterBottleOverlay implements IOverlayUI {
 
   private bubbles: Array<{ x: number; y: number; opacity: number }> = [];
   private waterDrops: Array<{ x: number; y: number; vy: number; opacity: number }> = [];
+  private corkOffsetY = 0;
 
   private dragStartX = 0;
   private dragStartY = 0;
@@ -333,8 +334,13 @@ export class WaterBottleOverlay implements IOverlayUI {
       this.waterMl = this.targetWaterMl;
     }
 
-    // Cork pop animation removed — cap stays on, bottle is sealed
-    // No overflow dome — water just fills inside
+    // Cork pop animation — cap lifts off when water reaches capacity
+    if (this.waterMl >= this.capacityMl * 0.95) {
+      const popFraction = Math.min(1, (this.waterMl - this.capacityMl * 0.95) / (this.capacityMl * 0.05));
+      this.corkOffsetY = -popFraction * this.cellSize * 4;
+    } else {
+      this.corkOffsetY = 0;
+    }
 
     // Falling water drops outside bottle (from cap area down the side)
     if (this.targetWaterMl > this.waterMl && this.frameCount % 12 === 0) {
@@ -372,10 +378,6 @@ export class WaterBottleOverlay implements IOverlayUI {
     const ox = this.gridOffsetX;
     const oy = this.gridOffsetY;
 
-    if (this.frameCount % 60 === 0) {
-      console.log('[wc] render frame', this.frameCount, 'waterMl', this.waterMl.toFixed(1), 'cellSize', cs, 'offset', ox, oy);
-    }
-
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     const isRidgeRow = (row: number) => row === 14 || row === 18 || row === 21;
@@ -387,7 +389,7 @@ export class WaterBottleOverlay implements IOverlayUI {
         const cell = BOTTLE_GRID[idx];
         if (cell !== 1) continue;
         const x = ox + col * cs;
-        const y = oy + row * cs;
+        const y = oy + row * cs + (isCapRow(row) ? this.corkOffsetY : 0);
 
         if (isCapRow(row)) {
           ctx.fillStyle = PALETTE.bottleCap;
@@ -410,10 +412,9 @@ export class WaterBottleOverlay implements IOverlayUI {
 
     const interiorRows = this.findInteriorRows();
     const waterFrac = Math.min(this.waterMl / this.capacityMl, 1);
-    const filledRows = Math.floor(interiorRows.length * waterFrac);
-    if (this.frameCount % 60 === 0) {
-      console.log('[wc] interiorRows', interiorRows.length, 'filledRows', filledRows, 'capacity', this.capacityMl);
-    }
+    const filledRows = this.waterMl > 0
+      ? Math.max(1, Math.floor(interiorRows.length * waterFrac))
+      : 0;
 
     for (let i = interiorRows.length - 1; i >= interiorRows.length - filledRows; i--) {
       const row = interiorRows[i];
