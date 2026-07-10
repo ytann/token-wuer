@@ -52,7 +52,7 @@ const PALETTE = {
   puddle: '#1565a0',
 } as const;
 
-const WATER_CAPACITY_ML = 1000;
+const DEFAULT_CAPACITY_ML = 1000;
 
 const CSS = `
 #${OVERLAY_ID} {
@@ -76,21 +76,32 @@ const CSS = `
 }
 
 #${OVERLAY_ID}[data-state="minimized"] {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   padding: 4px;
-  border-radius: 6px;
-  overflow: hidden;
+  border-radius: 8px;
+  background: rgba(15, 25, 35, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  cursor: pointer;
 }
 
 #${OVERLAY_ID}[data-state="minimized"] canvas,
 #${OVERLAY_ID}[data-state="minimized"] .wc-counter,
-#${OVERLAY_ID}[data-state="minimized"] .wc-resize {
+#${OVERLAY_ID}[data-state="minimized"] .wc-resize,
+#${OVERLAY_ID}[data-state="minimized"] .wc-header {
   display: none;
 }
 
-#${OVERLAY_ID}[data-state="minimized"] .wc-header {
-  margin: 0;
+#${OVERLAY_ID} .wc-minimized-icon {
+  display: none;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#${OVERLAY_ID}[data-state="minimized"] .wc-minimized-icon {
+  display: block;
 }
 
 #${OVERLAY_ID} .wc-header {
@@ -177,6 +188,7 @@ export class WaterBottleOverlay implements IOverlayUI {
   private frameCount = 0;
   private waterMl = 0;
   private targetWaterMl = 0;
+  private capacityMl = 1000;
 
   private cellSize = 4;
   private canvasW = 80;
@@ -218,6 +230,7 @@ export class WaterBottleOverlay implements IOverlayUI {
       <canvas width="${this.canvasW}" height="${this.canvasH}"></canvas>
       <div class="wc-counter">\ud83d\udca7 0.0 ml</div>
       <div class="wc-resize"></div>
+      <div class="wc-minimized-icon">\ud83d\udeb0</div>
     `;
 
     document.body.appendChild(this.el);
@@ -242,6 +255,14 @@ export class WaterBottleOverlay implements IOverlayUI {
 
     minimizeBtn.addEventListener('click', () => this.toggleMinimize());
     closeBtn.addEventListener('click', () => this.unmount());
+
+    const minimizedIcon = this.el.querySelector('.wc-minimized-icon') as HTMLElement;
+    minimizedIcon.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (this.el?.getAttribute('data-state') === 'minimized') {
+        this.setState('active');
+      }
+    });
 
     this.mounted = true;
     this.startLoop();
@@ -307,7 +328,7 @@ export class WaterBottleOverlay implements IOverlayUI {
     }
 
     // Cork pop animation
-    if (this.waterMl >= WATER_CAPACITY_ML && !this.corkPopped) {
+    if (this.waterMl >= this.capacityMl && !this.corkPopped) {
       this.corkPopped = true;
       this.corkVY = -2.5;
     }
@@ -321,7 +342,7 @@ export class WaterBottleOverlay implements IOverlayUI {
     }
 
     // Falling water drops inside bottle (every 12 frames while filling below capacity)
-    if (this.targetWaterMl > this.waterMl && this.targetWaterMl < WATER_CAPACITY_ML && this.frameCount % 12 === 0) {
+    if (this.targetWaterMl > this.waterMl && this.targetWaterMl < this.capacityMl && this.frameCount % 12 === 0) {
       this.waterDrops.push({
         x: 7 + Math.random() * 2,
         y: 5,
@@ -336,7 +357,7 @@ export class WaterBottleOverlay implements IOverlayUI {
       d.vy += 0.03;
       const interiorRows = this.findInteriorRows();
       const surfaceRow = interiorRows.length > 0
-        ? interiorRows[interiorRows.length - 1 - Math.floor(interiorRows.length * Math.min(this.waterMl / WATER_CAPACITY_ML, 1.0))]
+        ? interiorRows[interiorRows.length - 1 - Math.floor(interiorRows.length * Math.min(this.waterMl / this.capacityMl, 1.0))]
         : GRID_ROWS;
       if (d.y >= surfaceRow) {
         d.opacity -= 0.15;
@@ -354,7 +375,7 @@ export class WaterBottleOverlay implements IOverlayUI {
       }
     }
 
-    if (this.waterMl > WATER_CAPACITY_ML && this.corkPopped && this.frameCount % 40 === 0) {
+    if (this.waterMl > this.capacityMl && this.corkPopped && this.frameCount % 40 === 0) {
       const capMid = 7.5;
       this.spillDrops.push({
         x: capMid + (Math.random() - 0.5) * 1.5,
@@ -442,7 +463,7 @@ export class WaterBottleOverlay implements IOverlayUI {
 
     const interiorRows = this.findInteriorRows();
     if (interiorRows.length > 0) {
-      const waterFrac = Math.min(this.waterMl / WATER_CAPACITY_ML, 1.0);
+      const waterFrac = Math.min(this.waterMl / this.capacityMl, 1.0);
       const filledRows = Math.floor(interiorRows.length * waterFrac);
 
       for (let i = interiorRows.length - 1; i >= interiorRows.length - filledRows; i--) {
@@ -491,8 +512,8 @@ export class WaterBottleOverlay implements IOverlayUI {
       ctx.globalAlpha = 1;
     }
 
-    if (this.waterMl > WATER_CAPACITY_ML) {
-      const overflowMl = this.waterMl - WATER_CAPACITY_ML;
+    if (this.waterMl > this.capacityMl) {
+      const overflowMl = this.waterMl - this.capacityMl;
       const domeRows = Math.min(6, Math.floor(overflowMl / 800));
       const capCols = [6, 7, 8, 9];
       for (let d = 0; d < domeRows; d++) {
@@ -548,7 +569,7 @@ export class WaterBottleOverlay implements IOverlayUI {
   update(ml: number): void {
     this.targetWaterMl = ml;
 
-    if (ml > this.waterMl && ml < WATER_CAPACITY_ML) {
+    if (ml > this.waterMl && ml < this.capacityMl) {
       const bot = this.findInteriorRows();
       const lowestRow = bot[bot.length - 1];
       for (let i = 0; i < 3; i++) {
@@ -573,6 +594,10 @@ export class WaterBottleOverlay implements IOverlayUI {
   setState(state: OverlayState): void {
     if (!this.el) return;
     this.el.setAttribute('data-state', state);
+  }
+
+  setCapacity(ml: number): void {
+    this.capacityMl = Math.max(100, ml);
   }
 
   isMounted(): boolean {
