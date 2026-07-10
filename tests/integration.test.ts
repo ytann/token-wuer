@@ -3,7 +3,7 @@ import { PlatformDetector } from '../src/content/detector';
 import { DOMScraper } from '../src/content/scraper';
 import { BPEstimator } from '../src/content/estimator';
 import { WaterConverter } from '../src/content/converter';
-import { WaterOverlay } from '../src/content/overlay';
+import { WaterBottleOverlay } from '../src/content/overlay';
 import { ConversationTracker } from '../src/content/tracker';
 import type { PlatformConfig, IConversationStore } from '../src/shared/types';
 
@@ -39,7 +39,7 @@ describe('integration: detector → scraper → estimator → converter → trac
     expect(detected).not.toBeNull();
     expect(detected!.id).toBe('test');
 
-    const overlay = new WaterOverlay();
+    const overlay = new WaterBottleOverlay();
     overlay.mount();
 
     const store = fakeStore();

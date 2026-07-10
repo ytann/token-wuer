@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { WaterOverlay } from '../../src/content/overlay';
+import { WaterBottleOverlay } from '../../src/content/overlay';
 import type { IOverlayUI } from '../../src/shared/types';
 
-describe('WaterOverlay', () => {
+describe('WaterBottleOverlay', () => {
   let overlay: IOverlayUI;
 
   beforeEach(() => {
-    overlay = new WaterOverlay();
+    overlay = new WaterBottleOverlay();
   });
 
   afterEach(() => {
@@ -35,7 +35,13 @@ describe('WaterOverlay', () => {
     expect(overlay.isMounted()).toBe(false);
   });
 
-  it('update displays ml value', () => {
+  it('mount creates a canvas element inside the overlay', () => {
+    overlay.mount();
+    const canvas = document.querySelector('#wc-overlay canvas');
+    expect(canvas).not.toBeNull();
+  });
+
+  it('update displays ml value on counter label', () => {
     overlay.mount();
     overlay.update(230);
     const counter = document.querySelector('#wc-overlay .wc-counter');

@@ -2,7 +2,7 @@ import { PlatformDetector } from './detector';
 import { DOMScraper } from './scraper';
 import { BPEstimator } from './estimator';
 import { WaterConverter } from './converter';
-import { WaterOverlay } from './overlay';
+import { WaterBottleOverlay } from './overlay';
 import { ConversationTracker } from './tracker';
 import { IndexedDBStore } from '../shared/db';
 import { DEFAULT_PLATFORMS } from '../shared/constants';
@@ -10,7 +10,7 @@ import type { PlatformConfig } from '../shared/types';
 
 class WaterCalculator {
   private store = new IndexedDBStore();
-  private overlay = new WaterOverlay();
+  private overlay = new WaterBottleOverlay();
   private tracker = new ConversationTracker(this.store, this.overlay);
   private estimator = new BPEstimator();
   private converter = new WaterConverter();
