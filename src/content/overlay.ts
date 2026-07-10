@@ -424,11 +424,17 @@ export class WaterBottleOverlay implements IOverlayUI {
       const row = interiorRows[i];
       const bounds = this.rowBounds(row);
       if (!bounds) continue;
+      const rowsFromBottom = interiorRows.length - 1 - i;
+      const [baseR, baseG, baseB] = rowsFromBottom <= 2 ? [33, 150, 243] : [21, 101, 160];
+      const drift = this.frameCount * 0.03;
       for (let col = bounds.left; col <= bounds.right; col++) {
         const x = ox + col * cs;
         const y = oy + row * cs;
-        const rowsFromBottom = interiorRows.length - 1 - i;
-        ctx.fillStyle = rowsFromBottom <= 2 ? PALETTE.waterSurface : PALETTE.waterMid;
+        const seed = row * 73 + col * 47;
+        const r = baseR + Math.round(Math.sin(seed * 0.3 + drift) * 6);
+        const g = baseG + Math.round(Math.sin(seed * 0.3 + drift + 2.1) * 6);
+        const b = baseB + Math.round(Math.sin(seed * 0.3 + drift + 4.2) * 6);
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
         ctx.fillRect(x, y, cs, cs);
       }
     }
