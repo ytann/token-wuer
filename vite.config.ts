@@ -1,7 +1,17 @@
 import { defineConfig } from 'vite';
-import { crx } from '@crxjs/vite-plugin';
-import manifest from './manifest.json' with { type: 'json' };
+import { resolve } from 'path';
+
+const entry = process.env.ENTRY || 'content';
 
 export default defineConfig({
-  plugins: [crx({ manifest })],
+  build: {
+    outDir: 'dist',
+    emptyOutDir: entry === 'content',
+    rollupOptions: {
+      input: resolve(__dirname, `src/${entry}/index.ts`),
+      output: {
+        entryFileNames: `${entry}.js`,
+      },
+    },
+  },
 });

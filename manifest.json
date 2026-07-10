@@ -12,7 +12,7 @@
     "https://www.perplexity.ai/*"
   ],
   "background": {
-    "service_worker": "src/background/index.ts"
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
@@ -23,8 +23,20 @@
         "https://perplexity.ai/*",
         "https://www.perplexity.ai/*"
       ],
-      "js": ["src/content/index.ts"]
+      "js": ["content.js"],
+      "run_at": "document_idle"
     }
   ],
-  "options_page": "src/options/index.html"
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://gemini.google.com/*",
+        "https://claude.ai/*",
+        "https://perplexity.ai/*",
+        "https://www.perplexity.ai/*"
+      ],
+      "resources": ["chunks/*"]
+    }
+  ]
 }

@@ -3,9 +3,7 @@
   "name": "Water Calculator",
   "version": "0.1.0",
   "description": "Track water consumption of your LLM conversations",
-  "permissions": [
-    "storage"
-  ],
+  "permissions": ["storage"],
   "host_permissions": [
     "https://chatgpt.com/*",
     "https://gemini.google.com/*",
@@ -14,38 +12,31 @@
     "https://www.perplexity.ai/*"
   ],
   "background": {
-    "service_worker": "service-worker-loader.js",
-    "type": "module"
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "js": [
-        "assets/index.ts-loader-DglLDZlK.js"
-      ],
       "matches": [
         "https://chatgpt.com/*",
         "https://gemini.google.com/*",
         "https://claude.ai/*",
         "https://perplexity.ai/*",
         "https://www.perplexity.ai/*"
-      ]
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
     }
   ],
-  "options_page": "src/options/index.html",
   "web_accessible_resources": [
     {
       "matches": [
         "https://chatgpt.com/*",
-        "https://claude.ai/*",
         "https://gemini.google.com/*",
+        "https://claude.ai/*",
         "https://perplexity.ai/*",
         "https://www.perplexity.ai/*"
       ],
-      "resources": [
-        "assets/constants-DAlGTvJw.js",
-        "assets/index.ts-D4_ZbHWw.js"
-      ],
-      "use_dynamic_url": false
+      "resources": ["chunks/*"]
     }
   ]
 }
