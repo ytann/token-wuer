@@ -3,7 +3,7 @@ import type { PlatformConfig } from './types';
 export const WATER_ML_PER_TOKEN = 0.003;
 
 export const WATER_CITATION =
-  'Water usage estimate based on: Li et al. (2023) "Making AI Less Thirsty" and Patterson et al. (2022) data center water efficiency benchmarks. Ratio: 3 ml per 1,000 tokens (inference only).';
+  'Water usage estimate based on: Li et al. (2023) "Making AI Less Thirsty" and Patterson et al. (2022) data center water efficiency benchmarks. Ratio: 3 ml per 1,000 tokens (inference only). Token counts approximated using GPT tokenization with platform-agnostic multiplier.';
 
 export const DEFAULT_PLATFORMS: PlatformConfig[] = [
   {
