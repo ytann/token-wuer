@@ -49,6 +49,8 @@ const PALETTE = {
   waterMid: '#1565a0',
   waterSurface: '#2196f3',
   waterFoam: '#64b5f6',
+  waterShimmer: '#90caf9',
+  waterDrop: '#42a5f5',
   puddle: '#1565a0',
 } as const;
 
@@ -490,15 +492,40 @@ export class WaterBottleOverlay implements IOverlayUI {
         }
       }
 
+      // Shimmer band — light stripe moving across the water body
+      if (filledRows > 4) {
+        const shimmerRow = interiorRows[interiorRows.length - 1 - Math.floor(filledRows / 2)];
+        const shimmerOffset = Math.floor(this.frameCount * 0.3) % GRID_COLS;
+        for (let col = 1; col < GRID_COLS - 1; col++) {
+          const idx = shimmerRow * GRID_COLS + col;
+          if (BOTTLE_GRID[idx] === 0) {
+            const distFromShimmer = Math.abs((col - shimmerOffset + GRID_COLS) % GRID_COLS - GRID_COLS / 2);
+            if (distFromShimmer < 3) {
+              const alpha = 1 - distFromShimmer / 3;
+              ctx.globalAlpha = alpha * 0.4;
+              ctx.fillStyle = PALETTE.waterShimmer;
+              ctx.fillRect(ox + col * cs, oy + shimmerRow * cs, cs, cs);
+              // also light the row above
+              const aboveIdx = (shimmerRow - 1) * GRID_COLS + col;
+              if (BOTTLE_GRID[aboveIdx] === 0) {
+                ctx.fillRect(ox + col * cs, oy + (shimmerRow - 1) * cs, cs, cs);
+              }
+            }
+          }
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      // Wavy ripple surface
       if (filledRows > 0 && filledRows <= interiorRows.length) {
         const surfaceRow = interiorRows[interiorRows.length - 1 - filledRows];
-        const wavePhase = Math.floor(this.frameCount / 3) % 2;
+        const waveOffset = Math.floor(Math.sin(this.frameCount * 0.15) * 2);
         for (let col = 1; col < GRID_COLS - 1; col++) {
           const idx = surfaceRow * GRID_COLS + col;
           if (BOTTLE_GRID[idx] !== 1) {
             const x = ox + col * cs;
             const y = oy + surfaceRow * cs;
-            if ((col + wavePhase) % 4 < 2) {
+            if ((col + waveOffset) % 4 < 2) {
               ctx.fillStyle = PALETTE.waterFoam;
               ctx.fillRect(x, y, cs, cs);
             }
@@ -517,7 +544,7 @@ export class WaterBottleOverlay implements IOverlayUI {
     // Falling water drops (inside bottle while filling)
     for (const d of this.waterDrops) {
       ctx.globalAlpha = Math.max(0, d.opacity);
-      ctx.fillStyle = PALETTE.waterSurface;
+      ctx.fillStyle = PALETTE.waterDrop;
       ctx.fillRect(ox + d.x * cs, oy + d.y * cs, cs * 0.5, cs);
       ctx.globalAlpha = 1;
     }
