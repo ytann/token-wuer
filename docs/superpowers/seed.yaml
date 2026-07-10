@@ -1,0 +1,52 @@
+# Seed — Water Calculator Browser Extension
+# Generated from interview: interview_48b51edf82834717
+
+goal: >
+  Build a browser extension (Chrome-first, Manifest V3) that estimates LLM
+  conversation water consumption by DOM-scraping visible text, converting
+  character counts to approximate token counts, then applying a fixed
+  water-to-token ratio from peer-reviewed literature. Display a translucent
+  water-fill overlay with a real-time ml/L counter. Track per-conversation
+  history locally with platform-native topic tags. Support major LLM
+  platforms (ChatGPT, Gemini, Claude, Perplexity) via platform-agnostic
+  selectors with per-platform fallbacks.
+
+constraints:
+  - "Chrome-first, Manifest V3"
+  - "DOM scraping only — no network interception"
+  - "All data stored locally (IndexedDB) — no servers, no telemetry"
+  - "Fixed water ratio from literature, cited in docs"
+  - "Inference-side token counting only (not training)"
+  - "Real-time counter updates during streaming"
+  - "Dashboard/analytics out of scope"
+
+acceptance_criteria:
+  - "Extension loads on ChatGPT, Gemini, Claude, and Perplexity pages"
+  - "Translucent overlay with water-fill animation is visible on supported platforms"
+  - "Water counter updates in real-time as LLM response streams"
+  - "Per-conversation records saved to IndexedDB with topic and water_total fields"
+  - "Extension works without any network requests (fully client-side)"
+  - "Water-to-token ratio is documented with literature citation"
+
+ontology:
+  name: ConversationWaterLog
+  description: A locally-persisted record of a single LLM conversation's water consumption
+  fields:
+    - id:string:unique identifier for the conversation record
+    - platform:string:LLM platform name (chatgpt, gemini, claude, etc.)
+    - topic:string:conversation title scraped from platform UI
+    - water_ml:number:total water consumed in milliliters
+    - token_estimate:number:estimated token count for the conversation
+    - started_at:string:ISO timestamp when tracking began
+    - ended_at:string:ISO timestamp when tracking ended
+
+evaluation_principles:
+  - Correctness:Extension accurately scrapes text from supported LLM platforms:0.35
+  - Performance:Real-time counter updates without lag or blocking the main thread:0.25
+  - Safety:No data leaves the browser; no CSP or ToS violations:0.25
+  - Polish:Overlay is unobtrusive, visually appealing, and matches the water-fill spec:0.15
+
+exit_conditions:
+  - ACs_pass:All acceptance criteria verified on each supported platform:manual verification
+  - No_network:Zero outbound network requests confirmed:DevTools audit
+  - Local_persist:Conversation records survive browser restart:manual verification
