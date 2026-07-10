@@ -38,7 +38,7 @@ export interface IPlatformDetector {
 export interface ITextScraper {
   attach(container: Element): void;
   detach(): void;
-  onNewText(callback: (delta: string) => void): void;
+  onNewText(callback: (delta: string) => void): () => void;
 }
 
 export interface ITokenEstimator {
@@ -57,10 +57,16 @@ export interface IOverlayUI {
   isMounted(): boolean;
 }
 
+export interface AddDeltaParams {
+  ml: number;
+  tokens: number;
+  topic?: string;
+}
+
 export interface IConversationTracker {
   start(url: string, platform: string): Promise<ConversationRecord>;
   resume(url: string): Promise<ConversationRecord | null>;
-  addDelta(ml: number, tokens: number, topic?: string): Promise<void>;
+  addDelta(params: AddDeltaParams): Promise<void>;
   getCurrent(): ConversationRecord | null;
 }
 
