@@ -1,8 +1,8 @@
 # PROJECT_MANIFEST.md — Water Calculator
 
-## Stage: Execution
+## Stage: Complete (Merged to main)
 
-Goal: All modules implemented, tested, built. Ready for verification and merge.
+Goal: All modules implemented, tested, built, merged to main.
 
 ## ADRs
 
