@@ -32,6 +32,7 @@ export class ConversationTracker implements IConversationTracker {
     const record = await this.store.findByTitle(title, this.current.platform);
     if (record) {
       this.current = record;
+      this.current.url = window.location.href;
       this.overlay.update(record.waterMl);
     }
     return record ?? null;

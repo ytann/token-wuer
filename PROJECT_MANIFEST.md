@@ -25,25 +25,9 @@ Goal: All modules implemented, tested, built, merged to main.
 
 ## Known Issues
 
-### OPEN — Chat-switch contamination: old scraper feeds deltas to wrong conversation (2026-07-11)
+### RESOLVED — Chat-switch contamination: URL guard on scraper callbacks (2026-07-11)
 
-**Symptom:** Toggling between Gemini chats causes water volume contamination between conversations. Example: User is on Chat A, mid-chat navigates to review old Chat B, then returns to Chat A. Chat A's bottle now includes water volume from Chat B's visible text — permanently contaminating the record in IndexedDB.
-
-**Root cause (race between DOM mutation and URL-change detection):**
-
-When the user navigates from Chat A to Chat B in an SPA (pushState/popstate):
-
-1. Gemini rewrites the DOM to show Chat B's content.
-2. The **old scraper's** MutationObserver fires on the new DOM nodes.
-3. `checkDelta()` finds new text → fires `onNewText` callbacks.
-4. The callback calls `this.tracker.addDelta(...)` — but `this.tracker.current` still points to **Chat A's record** (because `onUrlChange` hasn't been called yet, or it's mid-execution).
-5. Chat B's visible text is added to Chat A's water volume.
-6. `onUrlChange` fires (up to 100ms via pushState hook, or up to 2s via polling fallback), detaches the old scraper, and creates a new one for Chat B.
-7. When the user returns to Chat A, `resume()` loads the now-contaminated record.
-
-The core issue: `DOMScraper.detach()` disconnects the observer and clears the poll timer, but there is a window between the navigation click and `onUrlChange` detection where the old scraper's callbacks can still fire against the new page's DOM, routing deltas to the previous conversation's tracker.
-
-**Affected platforms:** Any SPA-based AI chat (Gemini, ChatGPT, Claude) — the contamination window exists whenever DOM mutation outpaces URL-change detection.
+**Fix:** Added `window.location.href` guard to both `onNewText` callback registrations in `src/content/index.ts`. Before processing a delta, the callback verifies that the current page URL still matches the tracker's active conversation URL. If the user navigated to a different chat (SPA pushState changes `window.location.href` before DOM renders new content), the delta is discarded. Also added `this.current.url = window.location.href` in `ConversationTracker.resume()` to prevent the URL guard from blocking deltas on resumed conversations whose records have stale URLs.
 
 ### OPEN — Content script injection unreliability (2026-07-11)
 
@@ -92,6 +76,7 @@ The core issue: `DOMScraper.detach()` disconnects the observer and clears the po
 | 2026-07-11 | Loop reliability: rAF→setInterval | Replaced rAF+health-check with race-free setInterval at 16ms; eliminated duplicate-loop thread contention |
 | 2026-07-11 | Drag-after-prompt fix | Reset dragging=false in contextmenu handler — prompt() consumed mouseup, leaving orphaned drag state |
 | 2026-07-11 | Content script injection investigation | Added diagnostic logs; switched run_at to document_end; documented known injection unreliability on Gemini |
+| 2026-07-11 | Chat-switch contamination fix | Added URL guard to onNewText callbacks; prevents old scraper deltas from contaminating other conversation records during SPA navigation |
 
 ## Planned Features
 
