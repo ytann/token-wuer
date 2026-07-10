@@ -2,13 +2,13 @@
 
 ## Commands
 
-<!-- Example: npm run dev | pytest | go run . -->
-- **setup:** ``
-- **build:** ``
-- **lint:** ``
-- **typecheck:** ``
-- **test:** ``
-- **run single test:** ``
+- **setup:** `npm install`
+- **build:** `npm run build` (tsc + vite build)
+- **lint:** `npm run lint` (tsc --noEmit)
+- **typecheck:** `npm run lint`
+- **test:** `npm test` (vitest run)
+- **run single test:** `npx vitest run tests/path/to/test.ts`
+- **dev:** `npm run dev` (vite watch)
 
 ## Architecture
 

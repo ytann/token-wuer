@@ -1,8 +1,8 @@
 # PROJECT_MANIFEST.md — Water Calculator
 
-## Stage: Planning
+## Stage: Execution
 
-Goal: Write the implementation plan and prepare for TDD execution.
+Goal: All modules implemented, tested, built. Ready for verification and merge.
 
 ## ADRs
 
@@ -15,11 +15,14 @@ Goal: Write the implementation plan and prepare for TDD execution.
 | ADR-05 | Dashboard/analytics out of scope | Separate future project; extension focuses on tracking + visual |
 | ADR-06 | Interface-first OOP (constructor injection) | Modules are self-contained plugins; removing one won't break the pipeline |
 | ADR-07 | BPE token estimation (no model) | Lightweight JS implementation with embedded vocab; no download needed |
+| ADR-08 | addDelta uses options object | Extensible without breaking callers (ml, tokens, topic?) |
+| ADR-09 | onNewText returns disposer | Callbacks can be unsubscribed, preventing memory leaks |
 
 ## Activity Log
 
 | Date | Activity | Details |
 |---|---|---|
-| 2026-07-10 | Seeding complete | Interview conducted, seed.yaml generated from 10 rounds of Socratic Q&A |
-| 2026-07-10 | Design complete | Architecture spec written with OOP principles, interface contracts |
-| 2026-07-10 | Planning complete | 15-task TDD implementation plan written |
+| 2026-07-10 | Seeding complete | Interview conducted, seed.yaml generated |
+| 2026-07-10 | Design complete | Architecture spec with OOP principles |
+| 2026-07-10 | Planning complete | 15-task TDD implementation plan |
+| 2026-07-10 | Execution complete | 10 modules, 44 tests, 0 lint errors, build passes |
