@@ -11,9 +11,9 @@ export const DEFAULT_PLATFORMS: PlatformConfig[] = [
     name: 'ChatGPT',
     urlMatch: 'chatgpt.com',
     selectors: {
-      messages: '[data-message-author-role], article[data-testid*="turn"]',
+      messages: '[data-message-id], [data-message-author-role], article[data-testid*="turn"], div[data-testid*="turn"]',
       title: 'title',
-      input: '#prompt-textarea, [contenteditable]',
+      input: '#prompt-textarea, [contenteditable="true"]',
     },
     builtIn: true,
   },
