@@ -39,7 +39,23 @@ describe('WaterOverlay', () => {
     overlay.mount();
     overlay.update(230);
     const counter = document.querySelector('#wc-overlay .wc-counter');
-    expect(counter?.textContent).toContain('230');
+    expect(counter?.textContent).toContain('230.0');
+    expect(counter?.textContent).toContain('ml');
+  });
+
+  it('update shows liters when >= 1000ml', () => {
+    overlay.mount();
+    overlay.update(2100);
+    const counter = document.querySelector('#wc-overlay .wc-counter');
+    expect(counter?.textContent).toContain('2.1');
+    expect(counter?.textContent).toContain('L');
+  });
+
+  it('update rounds to 1 decimal in ml', () => {
+    overlay.mount();
+    overlay.update(0.192);
+    const counter = document.querySelector('#wc-overlay .wc-counter');
+    expect(counter?.textContent).toContain('0.2');
   });
 
   it('does not throw if update called before mount', () => {

@@ -197,7 +197,13 @@ export class WaterOverlay implements IOverlayUI {
     const pct = Math.min((ml / MAX_WATER_ML) * 100, 100);
     this.fillEl.style.height = `${pct}%`;
 
-    this.counterEl.textContent = `\ud83d\udca7 ${ml} ml`;
+    if (ml >= 1000) {
+      const liters = (ml / 1000).toFixed(1);
+      this.counterEl.textContent = `\ud83d\udca7 ${liters} L`;
+    } else {
+      const rounded = ml.toFixed(1);
+      this.counterEl.textContent = `\ud83d\udca7 ${rounded} ml`;
+    }
   }
 
   setState(state: OverlayState): void {
