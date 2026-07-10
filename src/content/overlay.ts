@@ -186,10 +186,8 @@ export class WaterBottleOverlay implements IOverlayUI {
   private ctx: CanvasRenderingContext2D | null = null;
   private counterEl: HTMLElement | null = null;
   private mounted = false;
-  private animFrameId = 0;
+  private loopTimerId = 0;
   private frameCount = 0;
-  private lastLoopFrame = 0;
-  private healthCheckId = 0;
   private waterMl = 0;
   private targetWaterMl = 0;
   private capacityMl = 1000;
@@ -281,6 +279,7 @@ export class WaterBottleOverlay implements IOverlayUI {
 
     this.mounted = true;
     this.startLoop();
+    console.log('[wc] overlay mounted, loop started');
   }
 
   unmount(): void {
@@ -319,32 +318,17 @@ export class WaterBottleOverlay implements IOverlayUI {
   }
 
   private startLoop(): void {
-    const loop = () => {
-      this.lastLoopFrame = this.frameCount;
+    this.loopTimerId = window.setInterval(() => {
       this.frameCount++;
       this.updateAnimations();
       this.render();
-      this.animFrameId = requestAnimationFrame(loop);
-    };
-    this.animFrameId = requestAnimationFrame(loop);
-
-    this.healthCheckId = window.setInterval(() => {
-      if (this.mounted && this.frameCount - this.lastLoopFrame > 3) {
-        cancelAnimationFrame(this.animFrameId);
-        this.animFrameId = requestAnimationFrame(loop);
-        this.lastLoopFrame = this.frameCount;
-      }
-    }, 1000);
+    }, 16);
   }
 
   private stopLoop(): void {
-    if (this.animFrameId) {
-      cancelAnimationFrame(this.animFrameId);
-      this.animFrameId = 0;
-    }
-    if (this.healthCheckId) {
-      clearInterval(this.healthCheckId);
-      this.healthCheckId = 0;
+    if (this.loopTimerId) {
+      clearInterval(this.loopTimerId);
+      this.loopTimerId = 0;
     }
   }
 

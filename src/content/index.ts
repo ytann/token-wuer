@@ -93,6 +93,7 @@ class WaterCalculator {
     });
 
     this.scraper.attach(document.body);
+    console.log('[wc] scraper attached, platform:', this.config.id);
   }
 
   private isNewChatPage(url: string): boolean {
@@ -192,4 +193,5 @@ class WaterCalculator {
 }
 
 const app = new WaterCalculator();
-app.init().catch(() => {});
+console.log('[wc] content script loaded, starting init');
+app.init().catch((err) => { console.log('[wc] init error:', err); });
