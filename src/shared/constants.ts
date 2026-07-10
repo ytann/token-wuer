@@ -12,7 +12,8 @@ export const DEFAULT_PLATFORMS: PlatformConfig[] = [
     urlMatch: 'chatgpt.com',
     selectors: {
       messages: '[data-message-author-role="assistant"][data-message-id]',
-      title: 'title',
+      pageTitle: 'title',
+      titleSelector: 'h1, [data-testid="chat-header-title"]',
       input: '#prompt-textarea, [contenteditable="true"]',
     },
     builtIn: true,
@@ -23,7 +24,8 @@ export const DEFAULT_PLATFORMS: PlatformConfig[] = [
     urlMatch: 'gemini.google.com',
     selectors: {
       messages: 'message-content',
-      title: 'title',
+      pageTitle: 'title',
+      titleSelector: 'message-content:first-of-type',
       input: 'rich-textarea, [contenteditable]',
     },
     builtIn: true,
@@ -34,7 +36,8 @@ export const DEFAULT_PLATFORMS: PlatformConfig[] = [
     urlMatch: 'claude.ai',
     selectors: {
       messages: '[data-start], .font-claude-message',
-      title: 'title',
+      pageTitle: 'title',
+      titleSelector: '[data-testid="chat-name"]',
       input: '.ProseMirror, [contenteditable]',
     },
     builtIn: true,
@@ -45,7 +48,8 @@ export const DEFAULT_PLATFORMS: PlatformConfig[] = [
     urlMatch: 'perplexity.ai',
     selectors: {
       messages: '.prose, .message',
-      title: 'title',
+      pageTitle: 'title',
+      titleSelector: 'h1, .chat-title',
       input: 'textarea',
     },
     builtIn: true,

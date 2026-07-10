@@ -22,7 +22,8 @@ describe('constants', () => {
     for (const p of DEFAULT_PLATFORMS) {
       expect(typeof p.id).toBe('string');
       expect(p.selectors.messages.length).toBeGreaterThan(0);
-      expect(p.selectors.title.length).toBeGreaterThan(0);
+      expect(p.selectors.pageTitle.length).toBeGreaterThan(0);
+      expect(p.selectors.titleSelector.length).toBeGreaterThan(0);
       expect(p.selectors.input.length).toBeGreaterThan(0);
       expect(p.builtIn).toBe(true);
     }
