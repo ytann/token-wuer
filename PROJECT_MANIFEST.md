@@ -72,3 +72,20 @@ Goal: All modules implemented, tested, built, merged to main.
 | 2026-07-11 | Loop reliability: rAF→setInterval | Replaced rAF+health-check with race-free setInterval at 16ms; eliminated duplicate-loop thread contention |
 | 2026-07-11 | Drag-after-prompt fix | Reset dragging=false in contextmenu handler — prompt() consumed mouseup, leaving orphaned drag state |
 | 2026-07-11 | Content script injection investigation | Added diagnostic logs; switched run_at to document_end; documented known injection unreliability on Gemini |
+
+## Chrome Web Store — Publishing Checklist
+
+### Blockers
+- [ ] **Icons**: add 128×128, 48×48, 16×16 PNGs to manifest (`"icons": {...}`)
+- [ ] **Privacy policy**: required even for local-only data. Must state: IndexedDB only, no data leaves browser, no tracking
+- [ ] **Remove `web_accessible_resources`** or fix `chunks/*` (Vite produces no chunks)
+- [ ] **Test Claude + Perplexity**: selectors are untested best-guess; verify at least one response tracks
+
+### Pre-submission polish
+- [ ] **Permission justification** for `storage` (used by service worker for platform configs only)
+- [ ] **Bundle size review**: 1.7MB (gpt-tokenizer ~1MB gzipped). Chrome may flag. Consider lazy-loading tokenizer or switching to a lighter estimator
+- [ ] **Fix Gemini injection reliability** (see Known Issues above) — intermittent content-script failure could cause bad reviews
+- [ ] Add `"action"` (toolbar icon) so extension is visible in toolbar
+- [ ] Screenshots (1280×800) for store listing
+- [ ] Description + short description for store listing
+- [ ] Verify extension works after unpacked→packaged (.crx) transition
