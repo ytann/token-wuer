@@ -93,10 +93,7 @@ class WaterCalculator {
       if (tokens > 0) this.tracker.addDelta({ ml, tokens });
     });
 
-    const container = this.findMessageContainer();
-    if (container) {
-      this.scraper.attach(container);
-    }
+    this.scraper.attach(document.body);
   }
 
   private isNewChatPage(url: string): boolean {
@@ -113,12 +110,6 @@ class WaterCalculator {
     if (!this.config) return '';
     const titleEl = document.querySelector(this.config.selectors.title);
     return titleEl?.textContent?.trim() ?? '';
-  }
-
-  private findMessageContainer(): Element | null {
-    if (!this.config) return null;
-    const firstMsg = document.querySelector(this.config.selectors.messages);
-    return firstMsg?.parentElement ?? null;
   }
 
   private setupLifecycleListeners(): void {
@@ -185,18 +176,14 @@ class WaterCalculator {
         const ml = this.converter.toMl(tokens);
         if (tokens > 0) this.tracker.addDelta({ ml, tokens });
       });
-      const container = this.findMessageContainer();
-      if (container) {
-        this.scraper.attach(container);
-      }
+      this.scraper.attach(document.body);
       this.initialized = true;
     }
   }
 
   private onResume(): void {
     if (this.scraper && this.config) {
-      const container = this.findMessageContainer();
-      if (container) this.scraper.attach(container);
+      this.scraper.attach(document.body);
     }
   }
 
